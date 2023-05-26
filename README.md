@@ -1,5 +1,7 @@
 # Properties
 
+[![tests](https://github.com/ximtech/Properties/actions/workflows/cmake-ci.yml/badge.svg)](https://github.com/ximtech/Properties/actions/workflows/cmake-ci.yml)
+
 Property files similar to `.ini` files mainly used to store the configurable parameters of an application.
 They can also store different parameters as a pair of strings, one storing the name of parameter(key) and the
 other storing the value.
