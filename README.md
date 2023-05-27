@@ -20,7 +20,7 @@ More info on wiki: [link](https://en.wikipedia.org/wiki/.properties)
 - Lightweight design
 - Single include
 - Easy to use
--
+
 
 ### Tradeoffs
 
@@ -174,7 +174,7 @@ putProperty(properties, "k1", "v1");
 putProperty(properties, "k2", "v2");
 
 char buffer[32] = {0};
-propertiesToString(properties, buffer, 512);
+propertiesToString(properties, buffer, 32);
 
 printf("%s", buffer);
 ```
