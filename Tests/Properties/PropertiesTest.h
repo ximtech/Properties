@@ -13,46 +13,50 @@
 
 // https://en.wikipedia.org/wiki/.properties
 char propertyBuffer[] = "# You are reading a comment in \".properties\" file.\n"
-              "! The exclamation mark can also be used for comments.\n"
-              "# Lines with \"properties\" contain a key and a value separated by a delimiting character.\n"
-              "# There are 3 delimiting characters: '=' (equal), ':' (colon) and whitespace (space, \\t and \\f).\n"
-              "website = https://en.wikipedia.org/\n"
-              "language : \"English\"\r\n"
-              "topic .properties files\n"
-              "# A word on a line will just create a key with no value.\n"
-              "empty\n"
-              "# White space that appears between the key, the value and the delimiter is ignored.\n"
-              "# This means that the following are equivalent (other than for readability).\n"
-              "hello=hello\r\n"
-              "hello = \"hello\"\n"
-              "# Keys with the same name will be overwritten by the key that is the furthest in a file.\n"
-              "# For example the final value for \"duplicateKey\" will be \"second\".\n"
-              "duplicateKey = first\r\n"
-              "duplicateKey = second\n"
-              "# To use the delimiter characters inside a key, you need to escape them with a \\.\n"
-              "# However, there is no need to do this in the value.\n"
-              "delimiterCharacters\\:\\=\\ = This is the value for the key \"delimiterCharacters\\:\\=\\ \"\n"
-              "# Adding a \\ at the end of a line means that the value continues to the next line.\n"
-              "multiline = This line \\\n"
-              "continues\n"
-              "# If you want your value to include a \\, it should be escaped by another \\.\n"
-              "path = c:\\\\wiki\\\\templates\n"
-              "# This means that if the number of \\ at the end of the line is even, the next line is not included in the value.\n"
-              "# In the following example, the value for \"evenKey\" is \"This is on one line\\\".\n"
-              "evenKey = This is on one line\\\\\n"
-              "# This line is a normal comment and is not included in the value for \"evenKey\"\n"
-              "# If the number of \\ is odd, then the next line is included in the value.\n"
-              "# In the following example, the value for \"oddKey\" is \"This is line one and\\#This is line two\".\n"
-              "oddKey = This is line one and\\\\\\\n"
-              "        # This is line two\n"
-              "# White space characters are removed before each line.\n"
-              "# Make sure to add your spaces before your \\ if you need them on the next line.\n"
-              "# In the following example, the value for \"welcome\" is \"Welcome to Wikipedia!\".\n"
-              "welcome = Welcome to \\\r\n"
-              "          Wikipedia!\n"
-              "# If you need to add newlines and carriage returns, they need to be escaped using \\n and \\r respectively.\n"
-              "# You can also optionally escape tabs with \\t for readability purposes.\n"
-              "valueWithEscapes=This is a newline\\n and a carriage return\\r and a tab\\t.\n";
+                        "! The exclamation mark can also be used for comments.\n"
+                        "# Lines with \"properties\" contain a key and a value separated by a delimiting character.\n"
+                        "# There are 3 delimiting characters: '=' (equal), ':' (colon) and whitespace (space, \\t and \\f).\n"
+                        "website = https://en.wikipedia.org/\n"
+                        "language : \"English\"\r\n"
+                        "topic .properties files\n"
+                        "# A word on a line will just create a key with no value.\n"
+                        "empty\n"
+                        "# White space that appears between the key, the value and the delimiter is ignored.\n"
+                        "# This means that the following are equivalent (other than for readability).\n"
+                        "hello=hello\r\n"
+                        "hello = \"hello\"\n"
+                        "# Keys with the same name will be overwritten by the key that is the furthest in a file.\n"
+                        "# For example the final value for \"duplicateKey\" will be \"second\".\n"
+                        "duplicateKey = first\r\n"
+                        "duplicateKey = second\n"
+                        "# To use the delimiter characters inside a key, you need to escape them with a \\.\n"
+                        "# However, there is no need to do this in the value.\n"
+                        "delimiterCharacters\\:\\=\\ = This is the value for the key \"delimiterCharacters\\:\\=\\ \"\n"
+                        "# Adding a \\ at the end of a line means that the value continues to the next line.\n"
+                        "multiline = This line \\\n"
+                        "continues\n"
+                        "# If you want your value to include a \\, it should be escaped by another \\.\n"
+                        "path = c:\\\\wiki\\\\templates\n"
+                        "# This means that if the number of \\ at the end of the line is even, the next line is not included in the value.\n"
+                        "# In the following example, the value for \"evenKey\" is \"This is on one line\\\".\n"
+                        "evenKey = This is on one line\\\\\n"
+                        "# This line is a normal comment and is not included in the value for \"evenKey\"\n"
+                        "# If the number of \\ is odd, then the next line is included in the value.\n"
+                        "# In the following example, the value for \"oddKey\" is \"This is line one and\\#This is line two\".\n"
+                        "oddKey = This is line one and\\\\\\\n"
+                        "        # This is line two\n"
+                        "# White space characters are removed before each line.\n"
+                        "# Make sure to add your spaces before your \\ if you need them on the next line.\n"
+                        "# In the following example, the value for \"welcome\" is \"Welcome to Wikipedia!\".\n"
+                        "welcome = Welcome to \\\r\n"
+                        "          Wikipedia!\n"
+                        "# If you need to add newlines and carriage returns, they need to be escaped using \\n and \\r respectively.\n"
+                        "# You can also optionally escape tabs with \\t for readability purposes.\n"
+                        "valueWithEscapes=This is a newline\\n and a carriage return\\r and a tab\\t.\n";
+
+char emptyPropertyBuffer[] = "# last modified 1 April 2001 by John Doe\n"
+                             "#port = 143\n"
+                             "#file = \"payroll.dat\"";  // only comments and no new line on the end of properties
 
 
 
@@ -82,6 +86,17 @@ static MunitResult testPropertiesLoad(const MunitParameter params[], void *data)
     deleteConfigProperties(properties);
 
     return MUNIT_OK;
+}
+
+static MunitResult testPropertiesLoadEmpty(const MunitParameter params[], void *data) {
+    Properties *properties = LOAD_PROPERTIES_BUFF(emptyPropertyBuffer);
+    assert_not_null(properties);
+    assert_true(properties->status == CONFIG_PROP_OK);
+
+    assert_uint32(propertiesSize(properties), ==, 0);
+    deleteConfigProperties(properties);
+    return MUNIT_OK;
+
 }
 
 static MunitResult testPropertiesStore(const MunitParameter params[], void *data) {
@@ -137,7 +152,7 @@ static MunitResult testPropertiesToStr(const MunitParameter params[], void *data
     putProperty(properties, "k4", NULL);
 
     char buffer[128] = {0};
-    propertiesToString(properties, buffer, 128);
+    propertiesToString(properties, buffer, ARRAY_SIZE(buffer));
 
     assert_not_null(strstr(buffer, "[k1]=[v1]"));
     assert_not_null(strstr(buffer, "[k2]=[v2]"));
@@ -152,6 +167,7 @@ static MunitResult testPropertiesToStr(const MunitParameter params[], void *data
 
 static MunitTest propertiesTests[] = {
         {.name =  "Test loadPropertiesBuffer() - should correctly parse properties", .test = testPropertiesLoad},
+        {.name =  "Test loadPropertiesBuffer() - should correctly parse empty properties", .test = testPropertiesLoadEmpty},
         {.name =  "Test storeProperties() - should correctly save properties", .test = testPropertiesStore},
         {.name =  "Test propStatusToString() - should correctly map properties to string", .test = testPropertiesToStr},
         END_OF_TESTS

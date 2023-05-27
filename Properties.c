@@ -17,10 +17,11 @@ static const char *const PROPERTY_STATUS_MSG_TABLE[] = {
 };
 
 static void parsePropertyBuffer(Properties *properties, char *dataBuffer);
-static uint32_t trimLineStart(char *text);
-static char *findLineEnd(char *text);
+static uint32_t trimLeadingWhitespaces(char *text);
+static char *findNewLineChar(char *text);
 static uint8_t getLineEndBackslashCount(const char *textStart, char *textEnd);
 static char *resolveMultiline(char *textLine);
+static void handlePropertyLine(Properties *properties, char *textLine);
 static char *findMultilineIfPresent(char *textLine, uint8_t *separatorLength);
 static char *trimLineEnd(char *string);
 static bool savePropertyKeyValue(Properties *properties, char *key, char *value);
@@ -163,37 +164,33 @@ bool putProperty(Properties *properties, char *key, char *value) {
 
 static void parsePropertyBuffer(Properties *properties, char *dataBuffer) {
     for (char *text = dataBuffer; *text != '\0'; text++) {
-        text += trimLineStart(text);
+        text += trimLeadingWhitespaces(text);
         if (*text == '#' || *text == '!') {
-            text = strchr(text, '\n');   // skip comments
-            continue;
+            text = strchr(text, '\n');   // skip comments line
+            if (text == NULL) {
+                break;  // no new lines after comments, exit the loop
+            }
+            continue;   // move to the next line
         }
 
-        if (*text == '\0') {
-            break;
-        }
         char *textLine = text;
-        char *lineEnd = findLineEnd(text);
-        if (lineEnd == NULL) {
-            break;  // No new line is found, end of data
+        char *lineEnd = findNewLineChar(text);
+        if (lineEnd == NULL) {  // No new line is found, end of data
+            handlePropertyLine(properties, textLine);  // no line end '\n' char found, then handle all remaining string
+            break;
         }
 
         *lineEnd = '\0';    // terminate line
         uint32_t lineLength = strlen(textLine);
-        resolveMultiline(textLine);    // check for multiline value and resolve to one line
-        trimLineEnd(textLine);
-
-        char *key = textLine;
-        char *value = splitValueByDelimiter(textLine);
-        savePropertyKeyValue(properties, trimSpacesAndQuotes(key), trimSpacesAndQuotes(value));
+        handlePropertyLine(properties, textLine);
         if (properties->status != CONFIG_PROP_OK) {
-            return;
+            break;
         }
         text += lineLength; // move to next line
     }
 }
 
-static uint32_t trimLineStart(char *text) {
+static uint32_t trimLeadingWhitespaces(char *text) {
     uint32_t skippedChars = 0;
     while (isspace((int) *text)) {
         text++;
@@ -202,7 +199,7 @@ static uint32_t trimLineStart(char *text) {
     return skippedChars;
 }
 
-static char *findLineEnd(char *text) {
+static char *findNewLineChar(char *text) {
     char *textPointer = text;
     while ((textPointer = strchr(textPointer, '\n')) != NULL) {
         if (IS_NOT_MULTILINE(text, textPointer)) {    // if no backslash or even count
@@ -231,6 +228,15 @@ static uint8_t getLineEndBackslashCount(const char *textStart, char *textEnd) {
     }
 
     return backslashCount;
+}
+
+static void handlePropertyLine(Properties *properties, char *textLine) {
+    resolveMultiline(textLine);    // check for multiline value and resolve to one line
+    trimLineEnd(textLine);
+
+    char *key = textLine;
+    char *value = splitValueByDelimiter(textLine);
+    savePropertyKeyValue(properties, trimSpacesAndQuotes(key), trimSpacesAndQuotes(value));
 }
 
 static char *resolveMultiline(char *textLine) {
@@ -293,6 +299,10 @@ static char *trimLineEnd(char *string) {    // Trim trailing spaces and backslas
 
 static bool savePropertyKeyValue(Properties *properties, char *key, char *value) {
     uint32_t keyLength = strlen(key);
+    if (keyLength == 0) {
+        return false;
+    }
+
     char *propertyKey = malloc(sizeof(char) * (keyLength + 1));
     if (propertyKey == NULL) {
         properties->status = CONFIG_PROP_ERROR_MEMORY_ALLOC_KEY;
