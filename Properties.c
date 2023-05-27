@@ -24,7 +24,6 @@ static char *resolveMultiline(char *textLine);
 static char *findMultilineIfPresent(char *textLine, uint8_t *separatorLength);
 static char *trimLineEnd(char *string);
 static bool savePropertyKeyValue(Properties *properties, char *key, char *value);
-//static void savePropertyLineAsKeyValuePair(Properties *properties, char *textLine);
 static char *splitValueByDelimiter(char *textLine);
 static char *trimSpacesAndQuotes(char *string);
 

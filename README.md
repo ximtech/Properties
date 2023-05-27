@@ -21,7 +21,6 @@ More info on wiki: [link](https://en.wikipedia.org/wiki/.properties)
 - Single include
 - Easy to use
 
-
 ### Tradeoffs
 
 - Dynamic memory allocation used for each key and value
@@ -191,22 +190,3 @@ Free all resources
 ```c
 deleteConfigProperties(properties);
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
