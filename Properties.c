@@ -27,6 +27,7 @@ static char *trimLineEnd(char *string);
 static bool savePropertyKeyValue(Properties *properties, char *key, char *value);
 static char *splitValueByDelimiter(char *textLine);
 static char *trimSpacesAndQuotes(char *string);
+static void removePropertyEntry(Properties *properties, MapEntry *entry);
 
 
 Properties *loadProperties(Properties *properties, const char *fileName) {
@@ -159,7 +160,26 @@ void propertiesToString(Properties *properties, char *buffer, int32_t length) {
 }
 
 bool putProperty(Properties *properties, char *key, char *value) {
-    return key != NULL ? savePropertyKeyValue(properties, key, value) : false;
+    if (key == NULL) return false;
+    MapEntry *entry = hashMapGetEntry(properties->map, key);
+    if (entry != NULL) {
+        removePropertyEntry(properties, entry);
+    }
+    return savePropertyKeyValue(properties, key, value);
+}
+
+void propertiesRemove(Properties *properties, char *key) {
+    MapEntry *entry = hashMapGetEntry(properties->map, key);
+    if (entry != NULL) {
+        removePropertyEntry(properties, entry);
+    }
+}
+
+void propertiesPutAll(Properties *from, Properties *to) {
+    HashMapIterator iterator = getHashMapIterator(from->map);
+    while (hashMapHasNext(&iterator)) {
+        putProperty(to, (char *) iterator.key, iterator.value);
+    }
 }
 
 static void parsePropertyBuffer(Properties *properties, char *dataBuffer) {
@@ -372,4 +392,12 @@ static char *trimSpacesAndQuotes(char *string) {
 
     stringEnd[1] = '\0';    // Write new null terminator character
     return string;
+}
+
+static void removePropertyEntry(Properties *properties, MapEntry *entry) {
+    char *entryKey = (char *) entry->key;
+    char *entryValue = entry->value;
+    hashMapRemoveEntry(properties->map, entry);
+    free(entryKey);
+    free(entryValue);
 }

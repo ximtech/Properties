@@ -39,8 +39,9 @@ void storeProperties(Properties *properties, const char *fileName);
 const char *propStatusToString(PropertiesStatus status);
 void deleteConfigProperties(Properties *properties);
 
-
 bool putProperty(Properties *properties, char *key, char *value);
+void propertiesRemove(Properties *properties, char *key);
+void propertiesPutAll(Properties *from, Properties *to);
 
 static inline char *getProperty(Properties *properties, char *key) {
     return (char *) hashMapGet(properties->map, key);
@@ -60,14 +61,6 @@ static inline bool isEmptyProperties(Properties *properties) {
 
 static inline bool propertiesHasKey(Properties *properties, char *key) {
     return isHashMapContainsKey(properties->map, key);
-}
-
-static inline char *propertiesRemove(Properties *properties, char *key) {
-    return hashMapRemove(properties->map, key);
-}
-
-static inline void propertiesPutAll(Properties *from, Properties *to) {
-    hashMapAddAll(from->map, to->map);
 }
 
 void propertiesToString(Properties *properties, char *buffer, int32_t length);
