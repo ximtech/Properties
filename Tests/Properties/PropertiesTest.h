@@ -150,6 +150,7 @@ static MunitResult testPropertiesToStr(const MunitParameter params[], void *data
     putProperty(properties, "k2", "v2");
     putProperty(properties, "k3", "v3");
     putProperty(properties, "k4", NULL);
+    putProperty(properties, "k5", "");
 
     char buffer[128] = {0};
     propertiesToString(properties, buffer, ARRAY_SIZE(buffer));
@@ -158,6 +159,7 @@ static MunitResult testPropertiesToStr(const MunitParameter params[], void *data
     assert_not_null(strstr(buffer, "[k2]=[v2]"));
     assert_not_null(strstr(buffer, "[k3]=[v3]"));
     assert_not_null(strstr(buffer, "[k4]"));
+    assert_not_null(strstr(buffer, "[k5]"));
 
     deleteConfigProperties(properties);
 

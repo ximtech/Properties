@@ -331,8 +331,8 @@ static bool savePropertyKeyValue(Properties *properties, char *key, char *value)
     strcpy(propertyKey, key);
 
     char *propertyValue = NULL;
-    if (value != NULL) {
-        uint32_t valueLength = strlen(value);
+    uint32_t valueLength = (value != NULL) ? strlen(value) : 0;
+    if (valueLength > 0) {
         propertyValue = malloc(sizeof(char) * (valueLength + 1));
         if (propertyValue == NULL) {
             free(propertyKey);
