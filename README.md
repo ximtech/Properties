@@ -1,6 +1,8 @@
 # Properties
 
 [![tests](https://github.com/ximtech/Properties/actions/workflows/cmake-ci.yml/badge.svg)](https://github.com/ximtech/Properties/actions/workflows/cmake-ci.yml)
+[![codecov](https://codecov.io/gh/ximtech/Properties/branch/main/graph/badge.svg?token=hP5VGBlpEK)](https://codecov.io/gh/ximtech/Properties)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8d2d6f2769d746bca0fc85f7736a1c8a)](https://app.codacy.com/gh/ximtech/Properties/dashboard)
 
 Property files similar to `.ini` files mainly used to store the configurable parameters of an application.
 They can also store different parameters as a pair of strings, one storing the name of parameter(key) and the
