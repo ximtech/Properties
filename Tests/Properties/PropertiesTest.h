@@ -83,8 +83,12 @@ static MunitResult testPropertiesLoad(const MunitParameter params[], void *data)
     assert_null(getProperty(properties, "empty"));
     assert_true(propertiesHasKey(properties, "empty"));
 
-    deleteConfigProperties(properties);
+    assert_true(propertiesHasKey(properties, "topic"));
+    propertiesRemove(properties, "topic");
+    assert_null(getProperty(properties, "topic"));
+    assert_false(propertiesHasKey(properties, "topic"));
 
+    deleteConfigProperties(properties);
     return MUNIT_OK;
 }
 
@@ -152,7 +156,16 @@ static MunitResult testPropertiesToStr(const MunitParameter params[], void *data
     putProperty(properties, "k4", NULL);
     putProperty(properties, "k5", "");
 
-    char buffer[128] = {0};
+    Properties *propNext = INIT_PROPERTIES();
+    assert_not_null(propNext);
+    assert_true(propNext->status == CONFIG_PROP_OK);
+    putProperty(propNext, "k6", "v6");
+    putProperty(propNext, "k7", "v7");
+    putProperty(propNext, "k8", "v8");
+
+    propertiesPutAll(propNext, properties);
+
+    char buffer[256] = {0};
     propertiesToString(properties, buffer, ARRAY_SIZE(buffer));
 
     assert_not_null(strstr(buffer, "[k1]=[v1]"));
@@ -160,9 +173,11 @@ static MunitResult testPropertiesToStr(const MunitParameter params[], void *data
     assert_not_null(strstr(buffer, "[k3]=[v3]"));
     assert_not_null(strstr(buffer, "[k4]"));
     assert_not_null(strstr(buffer, "[k5]"));
+    assert_not_null(strstr(buffer, "[k6]=[v6]"));
+    assert_not_null(strstr(buffer, "[k7]=[v7]"));
+    assert_not_null(strstr(buffer, "[k8]=[v8]"));
 
     deleteConfigProperties(properties);
-
     return MUNIT_OK;
 }
 

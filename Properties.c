@@ -33,7 +33,8 @@ static void removePropertyEntry(Properties *properties, MapEntry *entry);
 Properties *loadProperties(Properties *properties, const char *fileName) {
     if (properties == NULL) return NULL;
 
-    if (fileName == NULL || strstr(fileName, PROPERTY_FILE_EXTENSION) == NULL) {
+    BufferString *filePath = NEW_STRING(FILENAME_MAX, fileName);
+    if (!isStrEndsWith(filePath, PROPERTY_FILE_EXTENSION)) {
         properties->status = CONFIG_PROP_ERROR_INVALID_FILE_TYPE;
         return properties;
     }
