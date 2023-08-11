@@ -40,7 +40,7 @@ Properties *loadProperties(Properties *properties, const char *fileName) {
     }
 
     File *propertyFile = NEW_FILE(fileName);
-    if (propertyFile == NULL || !isFileExists(propertyFile)) {
+    if (!isFileExists(propertyFile)) {
         properties->status = CONFIG_PROP_ERROR_FILE_NOT_FOUND;
         return properties;
     }
