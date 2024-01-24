@@ -39,9 +39,16 @@ Properties *loadProperties(Properties *properties, const char *fileName) {
         return properties;
     }
 
-    File *propertyFile = newFile(&properties->file, fileName);
+    properties->file = malloc(sizeof(struct File));
+    if (properties->file == NULL) {
+        properties->status = CONFIG_PROP_ERROR_MEMORY_ALLOC;
+        return properties;
+    }
+
+    File *propertyFile = newFile(properties->file, fileName);
     if (!isFileExists(propertyFile)) {
         properties->status = CONFIG_PROP_ERROR_FILE_NOT_FOUND;
+        free(properties->file);
         return properties;
     }
 
@@ -49,19 +56,22 @@ Properties *loadProperties(Properties *properties, const char *fileName) {
     char *dataBuffer = malloc(sizeof(char) * (fileSize + 1));
     if (dataBuffer == NULL) {
         properties->status = CONFIG_PROP_ERROR_MEMORY_ALLOC;
+        free(properties->file);
         return properties;
     }
 
     uint32_t dataLength = readFileToBuffer(propertyFile, dataBuffer, fileSize);
     if (dataLength != fileSize) {
-        free(dataBuffer);
         properties->status = CONFIG_PROP_ERROR_READ_FILE;
+        free(dataBuffer);
+        free(properties->file);
         return properties;
     }
 
     initProperties(properties);
     if (properties->status != CONFIG_PROP_OK) {
         free(dataBuffer);
+        free(properties->file);
         return properties;
     }
 
@@ -72,6 +82,7 @@ Properties *loadProperties(Properties *properties, const char *fileName) {
 
 Properties *loadPropertiesBuffer(Properties *properties, char *dataBuffer) {
     if (properties == NULL) return NULL;
+    properties->file = NULL;
 
     properties->map = getHashMapInstance(PROPERTIES_INITIAL_CAPACITY);
     if (properties->map == NULL) {
@@ -86,6 +97,7 @@ Properties *loadPropertiesBuffer(Properties *properties, char *dataBuffer) {
 
 Properties *initProperties(Properties *properties) {
     if (properties->map == NULL) {  // can be already created
+        properties->file = NULL;
         properties->map = getHashMapInstance(PROPERTIES_INITIAL_CAPACITY);
         if (properties->map == NULL) {
             deleteConfigProperties(properties);
@@ -105,7 +117,15 @@ void storeProperties(Properties *properties, const char *fileName) {
         return;
     }
 
-    File *propertyFile = newFile(&properties->file, fileName);
+    if (properties->file == NULL) {
+        properties->file = malloc(sizeof(struct File));
+        if (properties->file == NULL) {
+            properties->status = CONFIG_PROP_ERROR_MEMORY_ALLOC;
+            return;
+        }
+    }
+
+    File *propertyFile = newFile(properties->file, fileName);
     if (propertyFile == NULL || !createFile(propertyFile)) {
         properties->status = CONFIG_PROP_ERROR_CREATE_FILE;
         return;
@@ -141,6 +161,8 @@ void deleteConfigProperties(Properties *properties) {
             free(iterator.value);
         }
         hashMapDelete(properties->map);
+        free(properties->file);
+        properties->file = NULL;
     }
 }
 
@@ -267,7 +289,7 @@ static char *resolveMultiline(char *textLine) {
         uint32_t targetLength = 0;
         char *target = textPointer + separatorLength;  // Skip multiline separator
         char charToRemove = *target;
-        while (charToRemove != '\0' && isspace(charToRemove)) { // skip whitespaces
+        while (charToRemove != '\0' && isspace((int) charToRemove)) { // skip whitespaces
             targetLength++;
             charToRemove = target[targetLength];
         }

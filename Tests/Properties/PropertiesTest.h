@@ -3,11 +3,7 @@
 #include "BaseTestTemplate.h"
 #include "Properties.h"
 
-#if defined(_WIN32) || defined(_WIN64)
-    #define FROM_PATH "\\tmp\\"
-#else
-    #define FROM_PATH "/tmp/dir/"
-#endif
+#define FROM_PATH "/tmp/dir/"
 
 #define PROPERTY_FILE_NAME "app.properties"
 
@@ -116,6 +112,7 @@ static MunitResult testPropertiesStore(const MunitParameter params[], void *data
     File *propFile = NEW_FILE(FROM_PATH PROPERTY_FILE_NAME);
     createFileDirs(propFile);
     storeProperties(properties, propFile->path);
+    assert_true(properties->status == CONFIG_PROP_OK);
 
     Properties *propsFromFile = LOAD_PROPERTIES(propFile->path);
     assert_not_null(propsFromFile);

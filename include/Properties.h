@@ -4,7 +4,7 @@
 #include "HashMap.h"
 
 #ifndef PROPERTIES_INITIAL_CAPACITY
-    #define PROPERTIES_INITIAL_CAPACITY 8
+    #define PROPERTIES_INITIAL_CAPACITY 32
 #endif
 
 typedef enum PropertiesStatus {
@@ -20,7 +20,7 @@ typedef enum PropertiesStatus {
 } PropertiesStatus;
 
 typedef struct Properties {
-    File file;
+    File *file;
     HashMap map;
     PropertiesStatus status;
 } Properties;
